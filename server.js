@@ -3,7 +3,7 @@ require('dotenv').config(); // Load environment variables from .env
 const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const sqlite3 = require('sqlite3').verbose(); // SQLite client
+const mongoose = require('mongoose'); // MongoDB client
 const app = express();
 const port = 3000;
 
@@ -12,21 +12,23 @@ const users = [
   { username: 'admin', password: 'admin123' } // Add more users here if needed
 ];
 
-// Set up SQLite database
-const db = new sqlite3.Database('./quotes.db');
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Create quotes table if it doesn't exist
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS quotes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      text TEXT NOT NULL,
-      date TEXT NOT NULL,
-      time TEXT NOT NULL,
-      author TEXT NOT NULL
-    )
-  `);
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Define the Quote schema
+const quoteSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  date: { type: String, required: true },
+  time: { type: String, required: true },
+  author: { type: String, required: true }
 });
+
+// Create the Quote model
+const Quote = mongoose.model('Quote', quoteSchema);
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -49,16 +51,16 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // Routes
-app.get('/', (req, res) => {
-  console.log('Fetching quotes from the database...');
-  db.all('SELECT * FROM quotes', (err, quotes) => {
-    if (err) {
-      console.error('Error fetching quotes:', err);
-      return res.status(500).send('Error fetching quotes');
-    }
+app.get('/', async (req, res) => {
+  try {
+    console.log('Fetching quotes from the database...');
+    const quotes = await Quote.find({});
     console.log('Quotes fetched successfully:', quotes);
     res.render('index', { quotes, user: req.session.user });
-  });
+  } catch (err) {
+    console.error('Error fetching quotes:', err);
+    res.status(500).send('Error fetching quotes');
+  }
 });
 
 app.get('/new-quote', isAuthenticated, (req, res) => {
@@ -66,39 +68,41 @@ app.get('/new-quote', isAuthenticated, (req, res) => {
   res.render('new-quote');
 });
 
-app.post('/save-quote', isAuthenticated, (req, res) => {
-  console.log('Saving a new quote...');
-  const { text, date, time, author, unknownDate, unknownTime } = req.body;
+app.post('/save-quote', isAuthenticated, async (req, res) => {
+  try {
+    console.log('Saving a new quote...');
+    const { text, date, time, author, unknownDate, unknownTime } = req.body;
 
-  const finalDate = unknownDate === 'on' ? 'Unknown' : date;
-  const finalTime = unknownTime === 'on' ? 'Unknown' : time;
+    const finalDate = unknownDate === 'on' ? 'Unknown' : date;
+    const finalTime = unknownTime === 'on' ? 'Unknown' : time;
 
-  db.run(
-    'INSERT INTO quotes (text, date, time, author) VALUES (?, ?, ?, ?)',
-    [text, finalDate, finalTime, author],
-    (err) => {
-      if (err) {
-        console.error('Error saving quote:', err);
-        return res.status(500).send('Error saving quote');
-      }
-      console.log('Quote saved successfully');
-      res.redirect('/');
-    }
-  );
+    const newQuote = new Quote({
+      text,
+      date: finalDate,
+      time: finalTime,
+      author
+    });
+
+    await newQuote.save();
+    console.log('Quote saved successfully');
+    res.redirect('/');
+  } catch (err) {
+    console.error('Error saving quote:', err);
+    res.status(500).send('Error saving quote');
+  }
 });
 
-app.post('/delete-quote/:id', isAuthenticated, (req, res) => {
-  console.log('Deleting quote with ID:', req.params.id);
-  const quoteId = req.params.id;
-
-  db.run('DELETE FROM quotes WHERE id = ?', [quoteId], (err) => {
-    if (err) {
-      console.error('Error deleting quote:', err);
-      return res.status(500).send('Error deleting quote');
-    }
+app.post('/delete-quote/:id', isAuthenticated, async (req, res) => {
+  try {
+    console.log('Deleting quote with ID:', req.params.id);
+    const quoteId = req.params.id;
+    await Quote.findByIdAndDelete(quoteId);
     console.log('Quote deleted successfully');
     res.redirect('/');
-  });
+  } catch (err) {
+    console.error('Error deleting quote:', err);
+    res.status(500).send('Error deleting quote');
+  }
 });
 
 // Login routes
