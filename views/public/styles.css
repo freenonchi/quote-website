@@ -1,42 +1,109 @@
+/* General Styles */
 body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
+  font-family: 'Georgia', serif;
+  background-color: #f8f9fa;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.6;
 }
 
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Main Title */
 h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
   color: #333;
 }
 
-a {
-  color: #007BFF;
-  text-decoration: none;
+/* Quote Styles */
+.quote {
+  background-color: #fff;
+  border-left: 5px solid #007BFF;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-a:hover {
-  text-decoration: underline;
+.quote blockquote {
+  font-size: 1.25rem;
+  font-style: italic;
+  margin: 0 0 10px 0;
+  color: #555;
 }
 
-form {
-  margin-top: 20px;
+.quote p {
+  font-size: 1rem;
+  margin: 0;
+  color: #777;
 }
 
-label {
+.quote p.author {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.quote p.tags {
+  margin-top: 10px;
+}
+
+/* Tags Styles */
+.tags span {
+  display: inline-block;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 0.875rem;
+  padding: 5px 10px;
+  border-radius: 15px;
+  margin-right: 5px;
+}
+
+/* New Quote Form Styles */
+.new-quote-form {
+  background-color: #fff;
+  padding: 20px;
+  border-left: 5px solid #007BFF;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.new-quote-form label {
   display: block;
+  font-weight: bold;
   margin-bottom: 5px;
 }
 
-input, textarea, button {
-  margin-bottom: 10px;
+.new-quote-form input[type="text"],
+.new-quote-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-button {
-  padding: 10px 20px;
+.new-quote-form input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.new-quote-form button {
   background-color: #007BFF;
-  color: white;
+  color: #fff;
   border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 4px;
   cursor: pointer;
 }
 
-button:hover {
+.new-quote-form button:hover {
   background-color: #0056b3;
 }

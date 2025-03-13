@@ -3,30 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote Website</title>
+  <title>Quotes</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <h1>Quotes</h1>
-  <% if (user) { %>
-    <p>Welcome, <%= user.username %>!</p>
-    <a href="/new-quote">New Quote</a> | <a href="/logout">Logout</a>
-  <% } else { %>
-    <a href="/login">Login</a>
-  <% } %>
-  <ul>
-    <% quotes.forEach(quote => { %>
-      <li>
-        <blockquote><%= quote.text %></blockquote>
-        <p>— <%= quote.author %>, <%= quote.date %> at <%= quote.time %></p>
-        <% if (user) { %>
-          <!-- Add a delete button for each quote -->
-          <form action="/delete-quote/<%= quote.id %>" method="POST" style="display: inline;">
-            <button type="submit" onclick="return confirm('Are you sure you want to delete this quote?')">Delete</button>
-          </form>
-        <% } %>
-      </li>
-    <% }) %>
-  </ul>
+  <div class="container">
+    <h1>Quotes</h1>
+    <% if (user) { %>
+      <p>Welcome, <%= user.username %>!</p>
+      <a href="/new-quote">New Quote</a> | <a href="/logout">Logout</a>
+    <% } else { %>
+      <a href="/login">Login</a>
+    <% } %>
+    <ul>
+      <% quotes.forEach(quote => { %>
+        <li class="quote">
+          <blockquote><%= quote.text %></blockquote>
+          <p class="author">by <%= quote.author %></p>
+          <p class="tags">Tags: <span><%= quote.tags || 'N/A' %></span></p>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
 </body>
 </html>
