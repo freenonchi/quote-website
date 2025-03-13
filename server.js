@@ -71,20 +71,20 @@ app.get('/new-quote', isAuthenticated, (req, res) => {
 app.post('/save-quote', isAuthenticated, async (req, res) => {
   try {
     console.log('Saving a new quote...');
-    const { text, date, time, author, unknownDate, unknownTime } = req.body;
+    const { text, author } = req.body;
 
-    const finalDate = unknownDate === 'on' ? 'Unknown' : date;
-    const finalTime = unknownTime === 'on' ? 'Unknown' : time;
-
+    // Create a new quote with the provided text and author
     const newQuote = new Quote({
       text,
-      date: finalDate,
-      time: finalTime,
-      author
+      author,
+      tags: 'N/A' // Default tags to 'N/A' for now
     });
 
+    // Save the new quote to the database
     await newQuote.save();
     console.log('Quote saved successfully');
+
+    // Redirect to the homepage
     res.redirect('/');
   } catch (err) {
     console.error('Error saving quote:', err);
