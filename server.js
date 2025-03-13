@@ -3,7 +3,9 @@ require('dotenv').config(); // Load environment variables from .env
 const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const MongoStore = require('connect-mongo'); // Add connect-mongo for session storage
 const mongoose = require('mongoose'); // MongoDB client
+const path = require('path'); // For handling file paths
 const app = express();
 const port = 3000;
 
@@ -15,7 +17,7 @@ const users = [
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -36,10 +38,14 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key', // Use the secret key from .env
   resave: false,
   saveUninitialized: true,
+  store: MongoStore.create({ // Use connect-mongo for session storage
+    mongoUrl: MONGODB_URI,
+    collectionName: 'sessions' // Optional: Name of the collection to store sessions
+  }),
   cookie: { secure: false } // Set to true if using HTTPS
 }));
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'views/public'))); // Serve static files from views/public
 
 // Middleware to check if user is logged in
 const isAuthenticated = (req, res, next) => {
